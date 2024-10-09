@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskifyPro - Admin Dashboard</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="bg-gray-100">
+    <header class="bg-indigo-600 text-white fixed w-full top-0 left-0 z-50">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center"> <!-- Increased padding -->
+            <div class="flex items-center">
+                <img src="adminlogo.png" alt="TaskifyPro Logo" class="h-8 w-8 mr-2"> <!-- Increased logo size -->
+                <h1 class="text-xl font-bold">TaskifyPro</h1> <!-- Increased font size -->
+            </div>
+            <nav class="flex items-center space-x-2"> <!-- Increased space -->
+                <button onclick="showAdminDashboard()" class="bg-indigo-500 hover:bg-indigo-700 text-white px-3 py-2 rounded-lg transition duration-300 text-sm"> <!-- Increased button size -->
+                    <i class="fas fa-chart-line mr-1"></i>Admin Dashboard
+                </button>
+                <button onclick="showEmployeeDashboard()" class="bg-indigo-500 hover:bg-indigo-700 text-white px-3 py-2 rounded-lg transition duration-300 text-sm"> <!-- Increased button size -->
+                    <i class="fas fa-users mr-1"></i>Employee Dashboard
+                </button>
+                <button onclick="logout()" class="bg-red-500 hover:bg-red-700 text-white px-3 py-2 rounded-lg transition duration-300 text-sm"> <!-- Increased button size -->
+                    <i class="fas fa-sign-out-alt mr-1"></i>Log Out
+                </button>
+            </nav>
+        </div>
+    </header>
+    
+    <main class="container mx-auto px-6 mt-24"> <!-- Increased padding on sides and top -->
+        <div id="adminDashboard">
+            <div class="bg-white rounded-lg shadow-lg p-6 mb-4"> <!-- Increased padding -->
+                <h2 class="text-xl font-bold text-indigo-600 mb-3">Add New Task</h2> <!-- Increased font size -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6"> <!-- Increased gap -->
+                    <div>
+                        <label for="taskTitle" class="block text-sm font-medium text-gray-700 mb-2">Task Title</label>
+                        <input type="text" id="taskTitle" class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500" placeholder="Enter task title" required> <!-- Increased padding -->
+                    </div>
+                    <div>
+                        <label for="assignedTo" class="block text-sm font-medium text-gray-700 mb-2">Assign To</label>
+                        <select id="assignedTo" class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500"> <!-- Increased padding -->
+                            <option value="" disabled selected>Select Assignee</option>
+                            <option value="2">Team Developer</option>
+                            <option value="3">Team Coder</option>
+                            <option value="4">Web Developer</option>
+                            <option value="5">Blockchain Team</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="taskDeadline" class="block text-sm font-medium text-gray-700 mb-2">Deadline</label>
+                        <input type="date" id="taskDeadline" class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500" required> <!-- Increased padding -->
+                    </div>
+                </div>
+                <button onclick="addTask()" class="mt-3 w-full bg-indigo-600 text-white py-3 rounded-md hover:bg-indigo-700 transition duration-300 text-sm"> <!-- Increased padding -->
+                    <i class="fas fa-plus mr-1"></i>Add Task
+                </button>
+            </div>
+
+            <div id="teamsOverview" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div> <!-- Increased gap -->
+        </div>
+    </main>
+
+    <script>
+    const users = [
+        { id: 1, username: 'admin', password: 'admin123', role: 'admin' },
+        { id: 2, username: 'john', password: 'john123', role: 'employee', fullName: 'John Doe' },
+        { id: 3, username: 'jane', password: 'jane123', role: 'employee', fullName: 'Jane Smith' },
+        { id: 4, username: 'bob', password: 'bob123', role: 'employee', fullName: 'Bob Johnson' },
+        { id: 5, username: 'alice', password: 'alice123', role: 'employee', fullName: 'Alice Brown' },
+        { id: 6, username: 'mark', password: 'mark123', role: 'employee', fullName: 'Mark White' },
+        { id: 7, username: 'lucy', password: 'lucy123', role: 'employee', fullName: 'Lucy Green' },
+        { id: 8, username: 'mike', password: 'mike123', role: 'employee', fullName: 'Mike Blue' },
+        { id: 9, username: 'sara', password: 'sara123', role: 'employee', fullName: 'Sara Black' },
+        { id: 10, username: 'paul', password: 'paul123', role: 'employee', fullName: 'Paul Yellow' },
+        { id: 11, username: 'nina', password: 'nina123', role: 'employee', fullName: 'Nina Purple' },
+        { id: 12, username: 'tom', password: 'tom123', role: 'employee', fullName: 'Tom Orange' }
+    ];
+
+    let tasks = [
+        { id: 1, title: 'Implement new user authentication', assignedTo: 2, status: 'In Progress', deadline: '2024-09-20' },
+        { id: 2, title: 'Optimize database queries', assignedTo: 3, status: 'Pending', deadline: '2024-09-22' },
+        { id: 3, title: 'Create API documentation', assignedTo: 4, status: 'Completed', deadline: '2024-09-10' }
+    ];
+
+    const teams = [
+        { id: 1, name: 'Team Developer', members: [2, 3, 6, 7], icon: 'laptop-code' },
+        { id: 2, name: 'Team Coder', members: [4, 5, 8, 9], icon: 'database' },
+        { id: 3, name: 'Web Developer', members: [10, 11, 12, 2], icon: 'palette' },
+        { id: 4, name: 'BlockChain Team', members: [3, 4, 5, 6], icon: 'check-circle' }
+    ];
+
+    function login() {
+        const user = users.find(u => u.id === 1); // Auto-login as admin for demo
+        if (user) {
+            renderTeamsOverview();
+        }
+    }
+
+    function renderTeamsOverview() {
+        const teamsOverview = document.getElementById('teamsOverview');
+        teamsOverview.innerHTML = '';
+
+        teams.forEach(team => {
+            const teamMembers = team.members.map(memberId => {
+                const member = users.find(user => user.id === memberId);
+                return member ? member.fullName : 'Unknown';
+            }).join(', ');
+
+            const teamTasks = tasks.filter(task => team.members.includes(task.assignedTo));
+            
+            const teamDiv = document.createElement('div');
+            teamDiv.className = 'bg-white rounded-lg shadow-lg p-6'; // Increased padding
+            teamDiv.innerHTML = `
+                <div class="flex items-center mb-3">
+                    <i class="fas fa-${team.icon} text-lg text-indigo-600 mr-2"></i>
+                    <h3 class="text-md font-bold text-gray-800">${team.name}</h3>
+                </div>
+                <p class="text-gray-600 mb-2"><i class="fas fa-users mr-1"></i>${teamMembers}</p>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full text-xs">
+                        <thead>
+                            <tr>
+                                <th class="py-2 px-2 border-b">Task Title</th>
+                                <th class="py-2 px-2 border-b">Assigned To</th>
+                                <th class="py-2 px-2 border-b">Deadline</th>
+                                <th class="py-2 px-2 border-b">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${teamTasks.map(task => `
+                                <tr class="border-b hover:bg-gray-100">
+                                    <td class="py-2 px-2">${task.title}</td>
+                                    <td class="py-2 px-2">${users.find(user => user.id === task.assignedTo).fullName}</td>
+                                    <td class="py-2 px-2">${task.deadline}</td>
+                                    <td class="py-2 px-2">${task.status}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            teamsOverview.appendChild(teamDiv);
+        });
+    }
+
+    function showAdminDashboard() {
+        document.getElementById('adminDashboard').style.display = 'block';
+    }
+
+    function showEmployeeDashboard() {
+        // Implement navigation to Employee Dashboard
+        window.location.href = 'employe_dashboard.html';
+    }
+
+    function logout() {
+        alert('Logging out...');
+        // Implement logout functionality
+    }
+
+    function addTask() {
+        const title = document.getElementById('taskTitle').value;
+        const assignedTo = document.getElementById('assignedTo').value;
+        const deadline = document.getElementById('taskDeadline').value;
+
+        if (title && assignedTo && deadline) {
+            const newTask = {
+                id: tasks.length + 1,
+                title,
+                assignedTo: parseInt(assignedTo),
+                status: 'Pending',
+                deadline
+            };
+            tasks.push(newTask);
+            document.getElementById('taskTitle').value = '';
+            document.getElementById('assignedTo').value = '';
+            document.getElementById('taskDeadline').value = '';
+            renderTeamsOverview();
+        }
+    }
+
+    login();
+    </script>
+</body>
+</html>
